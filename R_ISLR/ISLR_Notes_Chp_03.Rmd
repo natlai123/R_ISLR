@@ -3,12 +3,12 @@ title: "ISLR Notes and Exercises"
 author: "Nathaniel"
 date: "Updated March 2018"
 output:
+  html_document:
+    keep_md: false
+    keep_tex: false
   pdf_document:
     toc: no
     toc_depth: 2
-  html_document:
-    keep_md: no
-    keep_tex: no
   word_document: default
 ---
 
