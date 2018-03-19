@@ -1,0 +1,259 @@
+---
+title: "ISLR Notes and Exercises"
+author: "Nathaniel"
+date: "Updated March 2018"
+output:
+  pdf_document:
+    toc: no
+    toc_depth: 2
+  html_document:
+    keep_md: no
+    keep_tex: no
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Chapter 3: Linear Regression
+
+## Prediction and Inference
+
+From Cross Valided, Inference: Given a set of data you want to infer how the output is generated as a function of the data.
+
+Prediction: Given a new measurement, you want to use an existing data set to build a model that reliably chooses the correct identifier from a set of outcomes."
+
+I must say the definitions of inference, in statistics and econmetrics, confuse me. ETM (2004): "If we are to interpret any given set of OLS parameter estimates, we need to know, at least approximately, how $\hat{\beta}$ is actually distributed. For purposes of \textbf{inference}, the most important feature of the distribution of any vector of parameter estimates is the matrix of its central second moments.
+
+It seems that inference accoding to ETM (2004), concerns about the distribution (1st and 2nd monments) of the estimator while, in ISLR (2013), inference, is about the change in response variable due to the change of an estimated parameters of a specified model. 
+
+## Potenital Problems of Regression:
+
+* Non-linearity of the response-predictor relationships.
+* Correlation of error terms.
+* Non-constant variance of error terms (heteroscedasticity).
+* Outliers.
+* High-leverage points.
+* Collinearity.
+
+## Frisch-Waugh-Lovell Theorem
+
+1. The OLS estimates of $\hat{\beta}$ from regressions $$y = X_1 \beta_1 + X_2 \beta_2 + u$$ 
+and $$M_1y = M_1 X_2 \beta_2 + residuals$$ are numerically identical, where $P_X = X (X^{T}X)^{-1} X^{T}$ 
+and $M_x = I - P_X = I - X (X^{T}X)^{-1} X^{T}$
+
+2. The residuals from the one-step and teo-step regressions are numerically identical (ETM P.69). 
+
+Think of the two-step model as regressing the residual of $y$ on $X_1$ onto the residual of $X1$ on $X_2$. The Theorm would shed important insight on the problem of collinearity. 
+
+For concepts such as hypothesis testing (t-test and F-test), SSE, $R^2$, variance inflation factor (VIE), Mallow's $C_p$ leverage point, influential point, AIC, BIC, forward selection, backward selection, mixed selection, see the ISLR book or the solution below for detail. 
+
+See ETM for the hat matrix and why "We say that observations for which $h_t$ is large have high leverage or are leverage points. A leverage point is not necessarily influential, but it has the potential to be influential."
+
+See also the `broom` package for implementation of models and graphics.
+ 
+ 
+## KNN regression vs KNN classification 
+ 
+#### Question 2
+
+KNN regression averages the closest observations to estimate prediction, KNN classifier assigns classification group based on majority of closest observations.
+
+KNN regression: given a value for $K$ and a prediction point $x_0$, KNN regression first identifies the $K$ training observations that are closest to $x_0$, represented by $N_0$. It then estimates $f(x_0)$ using the average of all the training responses in $N_0$. Then
+
+$$\hat{f}(x_0) = \frac{1}{K} \sum_{x_i \in N_o} y_i$$
+As usual, the greater the $K$, the more "smooth" the hyperplane, the lower the variance ($Var(\hat{f}(x_0)$), the more likely of the result of $Bias(\hat{f}(x_0))$. $K$ can be determined by Cross-Validation.
+
+
+KNN classifier: given a positive K-nearest integer $K$ and a test observation $x_0$, the KNN classifier first identifies the neighbors $K$ points in the training data that are closest to $x_0$, represented by $N_0$. It then estimates the conditional probability for class $j$ as the fraction of points in $N_0$ whose response values equal $j$:
+$$
+Pr(Y = j|X = x_0) = \frac{1}{K}\sum_{i\in N_0}I(y_i = j)
+$$
+Finally, KNN applies Bayes rule and classifies the test observation $x_0$ to the class with the largest probability.
+
+
+### Applied Questions
+
+### Question 9
+
+This question aims to teach standard regrassion prcedures.
+
+```{r}
+Auto = read.csv("/Users/nathaniellai/Desktop/R_Notes/R_ISLR/ISLR_data/Auto.csv", header=T, na.strings="?")
+Auto = na.omit(Auto)
+pairs(Auto[,-9])
+cor(subset(Auto, select=-name))
+lm.fit0 <- lm(mpg ~ . -name, data=Auto)
+summary(lm.fit0)
+```
+
+Overall, the model supports a relationship bwteen predictors and the response, as suggested by the low p-value of the F test. Of the seven variables (excluding the incept), `displacement`, `wight`, `year` and orugin` have statistically significant effects on `mpg` while `cylinders`, `horsepower`, and `acceleration` do not. The variable, `year`, indicates that, for every one year, `mpg` increases by the ``r coefficients(lm.fit0)["year"]``. In other words, cars become more fuel efficient every year.
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fit0)
+```
+
+From the Residual vs Fitted plot, there seems to be a quadratic relationship between the residuals and the fitted values, suggesting that non-linearity between the predictors and response. Polynomial regression or non-linear transformation such as interaction of the variables may be needed. 
+
+The Scale-Location plot, also known as the Spread-Location plot, shows if residuals are spread equally along the ranges of predictors. Homoscedasticity seems not to hold in the model as indicated by the non-horizontal line with equally (randomly) spread points.
+
+The QQ plot displays a steeper slope on the right tail, implying a positive skewness of the residuals. 
+
+The Residual vs Leverage plot suggests that `buick estate wagon (sw)` (obversation 14) has high leverage, despite not a high magnitude residual.
+
+```{r fig.height = 4, fig.width = 7, fig.align='center'}
+plot(predict(lm.fit0), rstudent(lm.fit0))
+```
+
+There are possible outliers as seen in the plot of studentized residuals
+because there are data with a value greater than 3.
+
+```{r}
+# Interaction Terms 
+lm.fit0 <- lm(mpg ~ . -name, data=Auto)
+lm.fit1 <- lm(mpg~cylinders+weight*cylinders+year+origin, data=Auto)
+lm.fit2 <- lm(mpg~acceleration+weight*acceleration+year+origin, data=Auto)
+lm.fit3 <- lm(mpg~horsepower+weight*horsepower+year+origin, data=Auto)
+summary(lm.fit0)
+summary(lm.fit1)
+summary(lm.fit2)
+summary(lm.fit3)
+```
+
+Insignificant variables's effect to `mpg` maybe captured by \textit{synergy} or interaction terms. Demonstarated aboved, interaction bwteen `weight` and `cylinders` (`lm.fit1`), bwteen `weight` and `acceleration` (`lm.fit2`), bwteen `weight` and and `horsepower` (`lm.fit3`) are all statistically significant. 
+
+```{r fig.height = 5.6, fig.width = 7, fig.align='center'}
+# Non-linear Transformations of the Predictors
+lm.fit4<-lm(log(mpg)~cylinders+displacement+horsepower+weight+acceleration+year+origin,data=Auto)
+summary(lm.fit2)
+par(mfrow=c(2,2)) 
+plot(lm.fit4)
+```
+```{r fig.height = 4, fig.width = 6.4, fig.align='center'}
+par(mfrow=c(1,1))
+plot(predict(lm.fit4),rstudent(lm.fit4))
+```
+
+As indicated by the Residual vs Fitted plot, QQ plot and the Scale-Location plot, heteroskedasticity appears to be a feature in the previous model with linear predictors. Also in the scatter matrix, `displacement`, `horsepower` and `weight` show a similar nonlinear pattern against response `mpg`. Non-linear transformations of the predictors may be appropriate. Using `log(mpg)` as the response variable, the outputs show that log transform of `mpg` yield a higher $R^2$ and residuals more normally distributed.
+
+\vspace{0.2cm}
+
+### Question 11
+
+This and the next questions (as well as question 5) ask about simple linear regression without an intercept. 
+
+```{r fig.height = 4, fig.width = 7, fig.align='center'}
+set.seed (1)
+x=rnorm (100)
+y=2*x+rnorm (100)
+plot(x,y)
+# Regress y on x. Result is highly significant
+lm.fit0 <- lm(y~x+0)
+summary(lm.fit0)
+# Regress x on y. Result is highly significant
+lm.fit1 <- lm(x~y+0)
+summary(lm.fit1)
+```
+
+First, the multiple $R^2$, adjusted $R^2$, t-statistics, and F-statistics are the same in the two models. Second, since $\hat{x} = \hat{\beta_{x}}y$ versus $\hat {y} = \hat{\beta_{y}}x$, so the betas should be inverse of each other ($\hat{\beta_{x}}=\frac{1}{\hat{\beta_{y}}}$) but they are somewhat off here ($\frac{1}{0.39111} = 2.557 \neq 1.994$). 
+
+```{r}
+lm.fit = lm(y~x)
+lm.fit2 = lm(x~y)
+summary(lm.fit)
+summary(lm.fit2)
+```
+
+The t-statistics are the same. 
+
+\vspace{0.2cm}
+
+### Question 12
+
+Generate an example in R with n = 100 observations in which the coefficient estimate for the regression of X onto Y is different from the coefficient estimate for the regression of Y onto X.
+
+```{r}
+# Question 11a is the example in point.
+```
+
+Generate an example in R with n = 100 observations in which the coefficient estimate for the regression of X onto Y is the same as the coefficient estimate for the regression of Y onto X.
+
+Focus on the denominator in equation 3.38. If $\sum(x_{i^{'}}^2) = \sum(y_{i^{'}}^2)$, $\hat{\beta}$ of regressing $y$ on $x$ will be equal to that of regressing $x$ on $y$. To illusrate, see 
+ 
+```{r}
+set.seed(1)
+x <- rnorm(100)
+# Generate random sample (i.e. y ) from x without replacement 
+y <- -sample(x, 100) 
+# suh that:
+sum(x^2)==sum(y^2)
+lm.fit_x <- lm(y~x+0)
+lm.fit_y <- lm(x~y+0)
+summary(lm.fit_x)
+summary(lm.fit_y)
+```
+
+\vspace{0.2cm}
+
+### Question 14 
+
+This problem focuses on the collinearity problem.
+
+```{r}
+set.seed (1)
+x1=runif (100)
+x2 =0.5*x1+rnorm (100) /10
+y=2+2*x1 +0.3*x2+rnorm (100)
+```
+
+The form of the linear model is $y = \beta_{0} + \beta_{1} x_{1} + \beta_{2} x_{2} + \varepsilon$ where $\beta_{0}=2$, $\beta_{1}=2$ and $\beta_{2}=0.3$.
+
+```{r fig.height = 4, fig.width = 7, fig.align='center'}
+cor(x1,x2)
+plot(x1,x2)
+lm.fit <- lm(y~x1+x2)
+summary(lm.fit)
+```
+
+Estimated beta coefficients are $\hat{\beta_{0}}=2.13$, $\hat{\beta_{1}}=1.44$ and $\hat{\beta_{2}}=1.01$. Coefficient for x1 is statistically significant but the coefficient for x2 is not. Null hypothesis for $x_{1}$, $H_0 : \beta_1=0$, is rejected at 0.01 significant level while that of $x_2$, $H_0: \beta_2=0$, is retained. 
+
+```{r fig.height = 5.8, fig.width = 6.4, fig.align='center'}
+par(mfrow=c(2,1), mar=c(2, 3, 2, 1), mgp=c(2, 0.8, 0))
+lm.fit1 <- lm(y~x1)
+summary(lm.fit1)
+plot(x1,y)
+abline(lm.fit1)
+
+lm.fit2 <- lm(y~x2)
+summary(lm.fit2)
+plot(x2,y)
+abline(lm.fit2)
+```
+
+Individually, both $x_1$ and $x_2$ enter the simple regression model with highly significant statistical levels.
+
+There is no contradiction. The problem lies in collinearity. It is hard to distinguish their individual effects from the combined effects when regressed upon together.
+
+```{r fig.height = 5.4, fig.width = 7, fig.align='center'}
+x1=c(x1, 0.1)
+x2=c(x2, 0.8)
+y=c(y,6)
+par(mfrow=c(2,2), mar=c(3.5, 3.5, 2, 1), mgp=c(2.4, 0.8, 0))
+# regression with both x1 and x2
+fit.lm <- lm(y~x1+x2)
+summary(fit.lm)
+plot(fit.lm)
+# regression with x1 only
+fit.lm1 <- lm(y~x2)
+summary(fit.lm1)
+plot(fit.lm1)
+# regression with x2 only
+fit.lm2 <- lm(y~x1)
+summary(fit.lm2)
+plot(fit.lm2)
+```
+The new observation ($[y$, $x_1$, $x_2] = [6, 0.1, 0.8]$) is an outlier for $x_2$ and has high leverage for both $x_1$ and $x_2$. From the residuals vs leverage plot, observation 101 falls on the right hand side in all three models. In particular, it stands out as the red line is extensivelt tilted relative to the dotted black line indicating high leverage (Cook's Distance) for the model in which $x_1$ and $x_2$ are the predictors of $y$.
+

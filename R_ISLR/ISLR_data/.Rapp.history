@@ -1,0 +1,2 @@
+load("/Users/nathaniellai/Desktop/R/ISLR 2/data/Auto.rda")
+load("/Users/nathaniellai/Desktop/R_Notes/R_ISLR/ISLR_data/Auto.rda")
