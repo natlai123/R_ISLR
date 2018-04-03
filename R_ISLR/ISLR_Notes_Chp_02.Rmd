@@ -170,3 +170,9 @@ ggplot(data = College) +
 ```
 Colleges with the most students from top $10\%$ perc do not necessarily have the highest graduation rate. Also, rate over 100 is erroneous. 
 
+
+#### References
+
+G.James, D.Witten, T.Hastie and R.Tibshirani (2013), An Introduction to Statistical Learning, with applications in R (ISLR), Springer
+
+

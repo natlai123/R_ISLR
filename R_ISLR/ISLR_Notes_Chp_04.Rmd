@@ -3,11 +3,11 @@ title: "ISLR Notes and Exercises"
 author: "Nathaniel"
 date: "March 2018"
 output:
-  pdf_document:
-    number_sections: no
+  html_document:
     toc: yes
     toc_depth: 2
-  html_document:
+  pdf_document:
+    number_sections: no
     toc: yes
     toc_depth: 2
   word_document: default
@@ -21,11 +21,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Problems with OLS for Classification
 
-Recall assumptions of Ordinary Linear Regression : 
+Recall key assumptions of Ordinary Linear Regression: 
 
-1. Linearity in parameters $\bf{y} = \bf{X \beta} + \bf{u}$
+1. Linearity in parameters $y = X \beta + u$
 
-2. Exogeneity: $E(u | \bf{X} ) = 0$ or Predeterminedness: $E(u_t | \bf{X_t}) = 0$
+2. Exogeneity: $E(u | X ) = 0$ or Predeterminedness: $E(u_t | X_t) = 0$
 
 3. Homoscedasticity: $v(u_t) = \sigma^2$
 
@@ -41,12 +41,14 @@ with variance,
 $$
 var(u) = (p_i)(1-p_i) = (\alpha + \beta x_i)(1- \alpha - \beta x_i)
 $$
+There are at least three problems using OLS regression on categorical dependent variable.
 
-Thus, homoscedasticity assumption is violated. The disturbance variance is at a maximum when $p_i=0.5$ and gets small when $p_i$ is near 1 or 0. There are two implications. First, the coefficient estimates are no longer efficient. Second, the standard error estimates are no longer consistent estimates of the true standard errors. That means that the estimated standard errors could be biased (either upward or downward) to unknown degrees, so is the derived test statistics (may have to use heteroscedasticity consistent covariance estimator).
+Comparing with OLS assumption 4, one can see that homoscedasticity assumption is violated. The disturbance variance, $var(u)$,  is at a maximum when $p_i=0.5$ and gets small when $p_i$ is near 1 or 0. There are two implications. First, the coefficient estimates are no longer efficient. Second, the standard error estimates are no longer consistent estimates of the true standard errors, meaning that the estimated standard errors could be biased (either upward or downward) to unknown degrees, so is the derived test statistics (one may have to resort to heteroscedasticity consistent covariance estimator).
 
-The conditional distribution $y\mid x$ is a Bernoulli distribution rather than a Gaussian distribution. 
+The conditional distribution of $p(y\mid x)$ is a Bernoulli distribution rather than a Gaussian distribution. 
 
-Interpretability is another problem of using OLS. The predicted values ($p_i$) are not restricted to $[0,1]$. 
+Interpretability is another problem of using OLS. The predicted values ($p_i$) are not restricted to $[0,1]$. Negative probabilities hinder interporetability.
+
 
 ## Logistic Regression
 
@@ -60,35 +62,42 @@ $$
   \frac{p_i}{1-p_i} = e^{X\beta}
 $$
 
+equivalently,
+
 $$
-p(X) = \frac{e^{{X} \beta}}{1 + e^{{X} \beta}}
+p(X) = \frac{e^{X \beta}}{1 + e^{X \beta}}
 $$
-Logistic regression does not make many of the key assumptions of linear regression and general linear models that are based on ordinary least squares algorithms – particularly regarding linearity, normality, homoscedasticity, and measurement level.
 
-*	That the outcome must be discrete, otherwise explained as, the dependent variable should be dichotomous in nature;
 
-*	There should be no outliers in the data, which can be assessed by converting the continuous predictors to standardized, or z scores, and remove values below -3.29 or greater than 3.29;
+Logistic regression does not make many of the key assumptions of linear regression and general linear models that are based on ordinary least squares algorithms such as linearity, normality, homoscedasticity, and measurement level. Logistic regression requires:
 
-*	There should be no high multicollinearity among the predictors. 
-here should be a linear relationship between the odds ratio, or EXP(B),and each independent variable.;
+*	Discrete outcome (dependent variable): the dependent variable should be dichotomous in nature;
 
-* Linearity with an ordinal or interval independent variable and the odds ratio;
+*	No outliers in the data, which can be assessed by converting the continuous predictors to standardized, or z-scores, and remove values below -3.29 or greater than 3.29;
 
-* Large sample size is required quite because maximum likelihood estimates are less powerful than ordinary least squares. Whilst OLS needs 5 cases per independent variable in the analysis, ML needs at least 10 cases per independent variable, some statisticians recommend at least 30 cases for each parameter to be estimated.
+*	No high multicollinearity among the predictors.
 
-* The error terms need to be independent. Logistic regression requires each observation to be independent. 
+* Linearity with the odds ratio and independent variable(s);
 
-### Marginal effects
-The marginal effects reflect the change in the probability of $y=1$ given a 1 unit change in an independent variable $x$. The question is at which data point we should pick to evaluate the cofficient.
+* Large sample size: This is because maximum likelihood (ML) estimates are less powerful than ordinary least squares. Whilst OLS needs 5 cases per independent variable in the analysis, ML needs at least 10 cases per independent variable, some statisticians recommend at least 30 cases for each parameter to be estimated.
+
+* Independent error terms: Logistic regression requires each observation to be independent. 
+
+
+### Marginal Effects
+
+Marginal effects reflect the change in the probability of $y=1$ given a 1 unit change in an independent variable $x$. The question is which data point we should pick to evaluate the cofficient.
 
 Specifically, the marginal effects at the mean is given as: 
+
 $$
-  \frac{\partial p}{\partial x_j} = F' (\bf{\bar{x}}\beta) \beta_j 
+  \frac{\partial p}{\partial x_j} = F'(\bar{x}\beta) \beta_j 
 $$
-But such an "average" person ma not exist, thereby hindering interpretability. Alternatively, we can use the average marginal effect,
+But such an ``average'' person may not exist, thereby hindering interpretability. Alternatively, we can use the average marginal effect,
 $$
-  \frac{\partial p}{\partial x_j} = \frac{1}{n}\sum F' (\bf{x}\beta) \beta_j
+  \frac{\partial p}{\partial x_j} = \frac{1}{n} \sum F' (x \beta) \beta_j
 $$
+
 Logit and Probit generally have similar marginal effects.
 
 
@@ -96,9 +105,13 @@ Logit and Probit generally have similar marginal effects.
 
 Case control sampling is a chearper alternative than random experiment trial. Sampling more controls than cases reduces the variance of parameters estimated. But after the ratio of 5 to 1, the variance reduction flatens out, indicating a deminishing return from collecting more controls. 
 
-With case control sampling, one needs to adjust for the intercept through $\hat{\beta^*_0} = \hat{\beta_0} + \text{log}(\frac{\pi}{1-\pi}) - \text{log}(\frac{\hat{\pi}}{1-\hat{\pi}})$, where $\pi$ us the true prior probability and $\hat{\pi}$ is the estimated prior probability.
+With case control sampling, one needs to adjust for the intercept through $\hat{\beta}^{*}_0 = \hat{\beta}_0 + \text{log}(\frac{\pi}{1-\pi}) - \text{log}(\frac{\hat{\pi}}{1-\hat{\pi}})$, where $\pi$ us the true prior probability and $\hat{\pi}$ is the estimated prior probability.
 
-#### Example
+
+#### Stock Market Data ISLR Example
+\vspace{0.2 cm}
+This eample refers to ISLR P154. 
+
 ```{r message=FALSE}
 # The Stock Market Data
 library(ISLR)
@@ -110,7 +123,7 @@ attach(Smarket)
 
 ```{r}
 # Logit Model
-glm.fit=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+glm.fit=glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
             data=Smarket,family=binomial)
 summary(glm.fit)
 coef(glm.fit)
@@ -126,17 +139,17 @@ table(glm.pred,Direction)
 mean(glm.pred==Direction)
 
 # Make training and test set
-train=(Year<2005)
-Smarket.2005=Smarket[!train,]
+train = (Year < 2005)
+Smarket.2005 = Smarket[!train,]
 dim(Smarket.2005)
-Direction.2005=Direction[!train]
+Direction.2005 = Direction[!train]
 
 # Refitting the data with sample from 2001-2004
 glm.fit = glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
               data=Smarket, family = binomial, subset = train)
-glm.probs=predict(glm.fit,Smarket.2005, type="response")
+glm.probs = predict(glm.fit, Smarket.2005, type = "response")
 glm.pred=rep("Down", 252)
-glm.pred[glm.probs>.5]="Up"
+glm.pred[glm.probs > .5] = "Up"
 table(glm.pred,Direction.2005)
 mean(glm.pred == Direction.2005)
 mean(glm.pred != Direction.2005) 
@@ -148,39 +161,34 @@ Logistic regression correctly predicted the movement of the market $52.2\%$ of t
 # Fit smaller model
 glm.fit = glm(Direction~Lag1+Lag2,data=Smarket,family=binomial,subset=train)
 summary(glm.fit) # Nothing becomes significant anyway
-glm.probs=predict(glm.fit,newdata=Smarket[!train,],type="response") 
+glm.probs = predict(glm.fit,newdata = Smarket[!train,],type = "response") 
 glm.pred=ifelse(glm.probs > 0.5,"Up","Down")
 table(glm.pred,Direction.2005)
-mean(glm.pred==Direction.2005)
+mean(glm.pred == Direction.2005)
 # Logistic regression has a 58% accuracy rate predicting an increase in the market
 106/(106+76)
 # To predict Direction on a day when Lag1 and Lag2 equal 1.2 and 1.1, use the predict() function:
-predict(glm.fit,newdata=data.frame(Lag1=c(1.2,1.5),
-          Lag2=c(1.1,-0.8)),type="response")
+predict(glm.fit,newdata=data.frame(Lag1 = c(1.2,1.5),
+          Lag2 = c(1.1,-0.8)),type ="response")
 ```
 
 
-Now the results appear to be a little better: $56\%$ of the daily movements
-have been correctly predicted. It is worth noting that in this case, a much
-simpler strategy of predicting that the market will increase every day will
-also be correct $56\%$ of the time! Hence, in terms of overall error rate, the logistic regression method is no better than the naive approach. However, the confusion matrix shows that on days when logistic regression predicts an increase in the market, it has a $58\%$ accuracy rate. This suggests a possible trading strategy of buying on days when the model predicts an increasing market, and avoiding trades on days when a decrease is predicted. Of course one would need to investigate more carefully whether this small improvement was real or just due to random chance.
+Now the results appear to be a little better: $56\%$ of the daily movements have been correctly predicted. It is worth noting that in this case, a much simpler strategy of predicting that the market will increase every day will also be correct $56\%$ of the time! Hence, in terms of overall error rate, the logistic regression method is no better than the naive approach. However, the confusion matrix shows that on days when logistic regression predicts an increase in the market, it has a $58\%$ accuracy rate. This suggests a possible trading strategy of buying on days when the model predicts an increasing market, and avoiding trades on days when a decrease is predicted. Of course one would need to investigate more carefully whether this small improvement was real or just due to random chance.
 
 
 ## Linear Discrimant Analysis
 
 Reasons for Linear Discrimant Analysis (LDA):
 
-* When the classes are well-separated, the parameter estimates for the
-logistic regression model are surprisingly unstable (perfect classification problem). Also if n is small and the distribution of the predictors $X$ is approximately normal in each of the classes, the linear discriminant model is more stable than the logistic regression model.
+* When the classes are well-separated, the parameter estimates for the logistic regression model are surprisingly unstable (perfect classification problem). Also if n is small and the distribution of the predictors $X$ is approximately normal in each of the classes, the linear discriminant model is more stable than the logistic regression model.
 
-* Logistic regression uses the conditional likelihood based on $pR(Y|X))$ known as discriminant learning while LDA uses the full likelihood based on $Pr(X,Y)$ known as generative learning.
+* Logistic regression uses the conditional likelihood based on $Pr(Y|X))$ known as discriminant learning while LDA uses the full likelihood based on $Pr(X,Y)$ known as generative learning.
 
 * LDA is popular when we have more than two response classes.
 
 * LDA assumes that the observations are drawn from a Gaussian distribution with a common covariance matrix in each class, and so can provide some improvements over logistic regression when this assumption approximately holds. Conversely, logistic regression can outperform LDA if these Gaussian assumptions are not met.
 
-If model is correctly specified, Bayes classifier, which classifies an
-observation to the class for which $p_k(X)$ is largest, has the lowest possible error rate out of all classifiers. LDA attempts to come up with a estimator that approximates the Bayes classifier to minimize the total error rate out of all classifiers (on condition that the model is correctly specified).
+If model is correctly specified, Bayes classifier, which classifies an observation to the class for which $p_k(X)$ is largest, has the lowest possible error rate out of all classifiers. LDA attempts to come up with a estimator that approximates the Bayes classifier to minimize the total error rate out of all classifiers (on condition that the model is correctly specified).
 
 An **inverse probability problem** has solution in the form of the probability that a certain process with a certain probability parameter of interest is being used to generate the observed data. In other owrds, *given the data we observed, which underlying data generateing process is more likely?* For instance, are the observations more likely generated from a fair coin heads or a bent coin heads given that for now we oberved $n$ coins that are heads? The \textbf{Bayes Theorm} which specifies posterior probability as a function of marginal prior probability for class $k$, $\pi_k$ provides a neat way to the problem. It states:
 $$
@@ -194,12 +202,12 @@ where:
 
 * posterior probability = probability after new data is observed
 * prior probability = probability before any data is observed or before new data is observed
-* likelihood = standard forward probability of data given parameters
+* likelihood = standard forward (conditional) probability of data given parameters
 * marginal probability = probability of the data
 
 \newpage
 
-In practice, parameters $\mu_1,..., \mu_k, \pi_1, ... , \pi_K$, and $\sigma^2$ is estimated. 
+In practice, parameters $\mu_1,..., \mu_k, \pi_1, ... , \pi_K$, and $\sigma^2$ are estimated using 
 $$
   \hat{\pi}_k = \frac{n_k}{n}
 $$
@@ -211,7 +219,7 @@ $$
 $$
 where $\hat{\sigma}^2_k=\frac{1}{n_k-1}\sum_{i:y_i = k} (x_i - \hat{\mu}_k)^2$
 
-With $p$ predictors, a choice of assumption is the multivariate normal distribution ($N(\bf{\mu_k}, \bf{\Sigma})$) with $Var(X_1)=Var(X_2) = ... = Var(X_k)$ ($k$ number of classes) and $Cov(X_1, X_k) = 0$ (the off-diagonal elements of the variance covariance matrix, $\Sigma$, common to all $k$ classes is zero). A total of $Kp$ linear cofficients are to be estimated.
+With $p$ predictors, a choice of assumption is the multivariate normal distribution ($N(\bf{\mu_k}, \bf{\Sigma})$) with $Var(X_1)=Var(X_2) = ... = Var(X_k)$ ($K$ number of classes) and $Cov(X_1, X_k) = 0$ (the off-diagonal elements of the variance covariance matrix, $\Sigma$, common to all $K$ classes is zero). A total of $K \times p$ linear cofficients are to be estimated.
 
 Substituting the pdf of the assumed distribution into the Bayes Theorm, taking log and rearranging the terms, we get the discriminant score:
 $$
@@ -221,7 +229,7 @@ which is linear in $x$ and can by expressed in the form $\delta_k(x) = c_{k_0} +
 
 Training error rates will usually be lower than test error rates, which are the real quantity of interest. Beaware of overfitting. 
 
-Importantly, the threhold for the posterior probability $p_k(x)$ can be varied according to domain knowledge such that error rate (null rate) of a given class could be decreased/increased. For example, we can change $Pr(default = Yes | X = x) > 0.5$ to $Pr(default = Yes | X = x) > 0.2$. The change in threshold can be captured in ROC curve (Power as a function of Type I Error), AUC, confusion matrix, sensitivity, specificity and other related concepts.
+Importantly, the threhold for the posterior probability $p_k(x)$ can be varied according to domain knowledge such that error rate (*null rate*) of a given class could be decreased/increased. For example, we can change $Pr(default = Yes | X = x) > 0.5$ to $Pr(default = Yes | X = x) > 0.2$. The change in threshold can be seen in ROC curve (Power as a function of Type I Error), AUC, confusion matrix, sensitivity, specificity and other related concepts.
 
 ## Naive Bayes
 
