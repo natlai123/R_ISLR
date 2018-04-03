@@ -3,11 +3,11 @@ title: "ISLR Notes and Exercises"
 author: "Nathaniel"
 date: "March 2018"
 output:
-  html_document:
-    toc: yes
-    toc_depth: 2
   pdf_document:
     number_sections: no
+    toc: yes
+    toc_depth: 2
+  html_document:
     toc: yes
     toc_depth: 2
   word_document: default
