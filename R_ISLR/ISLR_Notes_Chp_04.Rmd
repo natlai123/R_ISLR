@@ -205,8 +205,6 @@ where:
 * likelihood = standard forward (conditional) probability of data given parameters
 * marginal probability = probability of the data
 
-\newpage
-
 In practice, parameters $\mu_1,..., \mu_k, \pi_1, ... , \pi_K$, and $\sigma^2$ are estimated using 
 $$
   \hat{\pi}_k = \frac{n_k}{n}
