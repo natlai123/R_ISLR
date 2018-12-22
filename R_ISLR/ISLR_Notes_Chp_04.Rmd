@@ -136,7 +136,7 @@ glm.pred[glm.probs>.5]="Up"
 # Generating Confusion Matrix
 table(glm.pred,Direction)
 (507+145)/1250
-mean(glm.pred==Direction)
+mean(glm.pred == Direction)
 
 # Make training and test set
 train = (Year < 2005)
@@ -155,7 +155,7 @@ mean(glm.pred == Direction.2005)
 mean(glm.pred != Direction.2005) 
 ```
 
-Logistic regression correctly predicted the movement of the market $52.2\%$ of the time. But the training error rate is often overly optimistic. It tends to underestimate the test error rate. If we trained and tested the model on the same set of $1250$ observations. In other words, 0.478 is the training error rate. Perhaps by removing the variables that appear not to be helpful in predicting Direction, we can obtain a more effective model.  
+Logistic regression correctly predicted the movement of the market $52.2\%$ of the time. But the training error rate is often overly optimistic. It tends to underestimate the test error rate. If we trained and tested the model on the same set of $1250$ observations, we get the training error rate of 0.48. Perhaps by removing the variables that appear not to be helpful in predicting Direction, we can obtain a more effective model.  
 
 ```{r}
 # Fit smaller model
@@ -168,8 +168,8 @@ mean(glm.pred == Direction.2005)
 # Logistic regression has a 58% accuracy rate predicting an increase in the market
 106/(106+76)
 # To predict Direction on a day when Lag1 and Lag2 equal 1.2 and 1.1, use the predict() function:
-predict(glm.fit,newdata=data.frame(Lag1 = c(1.2,1.5),
-          Lag2 = c(1.1,-0.8)),type ="response")
+predict(glm.fit,newdata = data.frame(Lag1 = c(1.2,1.5),
+          Lag2 = c(1.1,-0.8)), type ="response")
 ```
 
 
@@ -217,7 +217,7 @@ $$
 $$
 where $\hat{\sigma}^2_k=\frac{1}{n_k-1}\sum_{i:y_i = k} (x_i - \hat{\mu}_k)^2$
 
-With $p$ predictors, a choice of assumption is the multivariate normal distribution ($N(\bf{\mu_k}, \bf{\Sigma})$) with $Var(X_1)=Var(X_2) = ... = Var(X_k)$ ($K$ number of classes) and $Cov(X_1, X_k) = 0$ (the off-diagonal elements of the variance covariance matrix, $\Sigma$, common to all $K$ classes is zero). A total of $K \times p$ linear cofficients are to be estimated.
+With $p$ predictors, a choice of assumption is the multivariate normal distribution ($N(\bf{\mu_k}, \bf{\Sigma})$) with $Var(X_1)=Var(X_2) = ... = Var(X_k)$ ($K$ number of classes) and $Cov(X_1, X_k) = 0$ (the off-diagonal elements of the variance covariance matrix, $\Sigma$, common to all $K$ classes is zero). A total of $K \times p$ linear cofficients are to be estimated (where $p$ is the number of predictors).
 
 Substituting the pdf of the assumed distribution into the Bayes Theorm, taking log and rearranging the terms, we get the discriminant score:
 $$
@@ -227,7 +227,7 @@ which is linear in $x$ and can by expressed in the form $\delta_k(x) = c_{k_0} +
 
 Training error rates will usually be lower than test error rates, which are the real quantity of interest. Beaware of overfitting. 
 
-Importantly, the threhold for the posterior probability $p_k(x)$ can be varied according to domain knowledge such that error rate (*null rate*) of a given class could be decreased/increased. For example, we can change $Pr(default = Yes | X = x) > 0.5$ to $Pr(default = Yes | X = x) > 0.2$. The change in threshold can be seen in ROC curve (Power as a function of Type I Error), AUC, confusion matrix, sensitivity, specificity and other related concepts.
+Importantly, the threhold for the posterior probability $p_k(x)$ can be varied according to domain knowledge such that error rate (*null rate*) of a given class could be decreased/increased. For example, we can change $Pr(default = Yes | X = x) > 0.5$ to $Pr(default = Yes | X = x) > 0.2$. The choice of the threshold may be backed by domain knowledge. The change in threhold can be seen in ROC curve (Power as a function of Type I Error), AUC, confusion matrix, sensitivity, specificity and other related concepts.
 
 ## Naive Bayes
 
@@ -239,33 +239,35 @@ If we impose conditional independence (a wrong but useful assumption) on the con
 $$
 f_k(x) = \prod^p_{j=1} = f_{j k}(x_j) 
 $$
-the covariance matrix of for each class, $\bf{\Sigma_k}$ is diagonal. The discriminant score is:
+the covariance matrix of for each class, $\bf{\Sigma_k}$ is diagonal. The discriminant score becomes:
 
 $$
 \delta_k(x) = -\frac{1}{2} \sum^p_{j=1} \Bigg[\frac{(x-\mu_{jk})^2}{\sigma^2_{kj}} \Bigg]+ \text{log} \pi_k 
 $$
+Use the `naivebayes` package in `R` to calculate the Naive Bayes estimator.
 
 ## Quadratic Discriminant Analysis
 
 In contrast to LDA, Quadratic Discriminant Analysis (QDA) assumes that each class has its own covariance matrix. That is, it assumes that an observation from the $k$th class is of the form $X \sim N(\mu_k, \Sigma_k)$, where $\Sigma_k$ is a covariance matrix for the $k$th class.
 
-The discriminant score of QDA, $\delta_k(x)$, is a quadratic function of $x$ with a total of $Kp(p+1)/2$ parameters to be estimated. 
+The discriminant score of QDA, $\delta_k(x)$, is a quadratic function of $x$ with a total of $Kp(p+1)/2$ parameters to be estimated (recall that of LDA is $K \times p$):
+
 $$
 \delta_k(x) = -\frac{1}{2} (x-\mu_k)^T \Sigma_k (x-\mu_k) + \text{log} \pi_k - \frac{1}{2} \text{log} |\Sigma_k|
 $$
 
-Bias-variance trade-off is crucial in chosing between LDA and QDA. "Roughly speaking, LDA tends to be a better bet than QDA if there are relatively few training observations and so reducing variance is crucial. In contrast, QDA is recommended if the training set is very large, so that the variance of the classifier is not a major concern, or if the assumption of $\bf{\Sigma_k}$ is clearly untenable."
+Bias-variance trade-off is crucial in chosing between LDA and QDA. "Roughly speaking, LDA tends to be a better bet than QDA if there are relatively few training observations and so reducing variance is crucial. In contrast, QDA is recommended if the training set is very large, so that the variance of the classifier is not a major concern, or if the assumption of $\Sigma_k$ is clearly untenable."
 
 ```{r}
 # Linear Discriminant Analysis
 require(MASS)
 data(Smarket)
 # Instead of making training and test set. Use Year<2005
-lda.fit=lda(Direction~Lag1+Lag2,data=Smarket, subset=Year<2005)
+lda.fit = lda(Direction ~ Lag1 + Lag2, data = Smarket, subset = Year < 2005)
 lda.fit
 ```
 
-Prior probabilities of $0.5$s may sugggest Random Walk. The coefficients of linear discriminants output provides the linear combination of `Lag1` and `Lag2` that are used to form the LDA decision rule. In other words, these are the multipliers of the elements of $X = x$ in (4.19). If $-0.642 *\text{Lag1} - 0.514* \text{Lag2}$ is large, then the LDA classifier will predict a market increase, vice versa.
+Prior probabilities of $0.5$ may sugggest Random Walk. The coefficients of linear discriminants output provides the linear combination of `Lag1` and `Lag2` that are used to form the LDA decision rule. In other words, these are the multipliers of the elements of $X = x$ in (ISLR Equation 4.19). If $-0.642 *\text{Lag1} - 0.514* \text{Lag2}$ is large, then the LDA classifier will predict a market increase, vice versa.
 
 ```{r}
 par(mar=c(3.5, 3.5, 2, 1), mgp=c(2.4, 0.8, 0)); plot(lda.fit)
@@ -302,7 +304,7 @@ mean(qda.class==Direction.2005)
 
 ## KNN Classifier 
 
-KNN is a completely non-parametric approach: no assumptions are made about the shape of the decision boundary. Therefore, we can expect this approach to dominate LDA and logistic regression when the decision boundary is highly non-linear. On the other hand, KNN does not tell us which predictors are important; we don’t get a table of coefficients.
+"KNN is a completely non-parametric approach: no assumptions are made about the shape of the decision boundary. Therefore, we can expect this approach to dominate LDA and logistic regression when the decision boundary is highly non-linear. On the other hand, KNN does not tell us which predictors are important; we don’t get a table of coefficients" (ISLR P. 151).
 
 QDA serves as a compromise between the non-parametric KNN
 method and the linear LDA and logistic regression approaches. Since QDA
@@ -310,9 +312,9 @@ assumes a quadratic decision boundary, it can accurately model a wider
 range of problems than can the linear methods. Though not as flexible
 as KNN, QDA can perform better in the presence of a limited number of
 training observations because it does make some assumptions about the
-form of the decision boundary.
+form of the decision boundary (parametric vs non-parametric).
 
-```{r message=FALSE}
+```{r message=FALSE, echo=FALSE}
 # K-Nearest Neighbors
 require(ISLR)
 library(class)
@@ -328,12 +330,12 @@ knn.pred=knn(Xlag[train,],Xlag[!train,],Direction[train],k=1)
 summary(knn.pred)
 ```
 
-`knn` function require 4 Inputs:
+In R, `knn` function require 4 Inputs:
 
-1. A matrix containing the predictors associated with the training data
-2. A matrix containing the predictors associated with the data for which we wish to make predictions
+1. A matrix (dataframe) containing the predictors associated with the training data
+2. A matrix (dataframe) containing the predictors associated with the data for which we wish to make predictions
 3. A vector containing the class labels for the training observations,
-4. A value for K, the number of nearest neighbors to be used by the classifier.
+4. A value for $K$, the number of nearest neighbors to be used by the classifier.
 
 ```{r}
 table(knn.pred,Direction[!train])

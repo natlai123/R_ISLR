@@ -3,12 +3,12 @@ title: "ISLR Notes and Exercises"
 author: "Nathaniel"
 date: "Updated March 2018"
 output:
-  html_document:
-    keep_md: false
-    keep_tex: false
   pdf_document:
     toc: no
     toc_depth: 2
+  html_document:
+    keep_md: false
+    keep_tex: false
   word_document: default
 ---
 
@@ -46,7 +46,7 @@ and $M_x = I - P_X = I - X (X^{T}X)^{-1} X^{T}$
 
 2. The residuals from the one-step and teo-step regressions are numerically identical (ETM P.69). 
 
-Think of the two-step model as regressing the residual of $y$ on $X_1$ onto the residual of $X1$ on $X_2$. The Theorm would shed important insight on the problem of collinearity. 
+Think of the two-step model as regressing the residual of $y$ on $X_1$ onto the residual of $X_1$ on $X_2$. The Theorm would shed important insight on the problem of collinearity. 
 
 For concepts such as hypothesis testing (t-test and F-test), SSE, $R^2$, variance inflation factor (VIE), Mallow's $C_p$ leverage point, influential point, AIC, BIC, forward selection, backward selection, mixed selection, see the ISLR book or the solution below for detail. 
 
